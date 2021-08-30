@@ -1,0 +1,288 @@
+## All these are copied pretty much verbatim from
+##  ConnectionScannerTest.php in open-track/journey-planner project
+
+
+testBasicJourney:
+  timetable:
+    CS1234:
+      - [A, x, '10:00']
+      - [B, '10:15', '10:20']
+      - [C, '10:45', '11:00']
+      - [D, '11:15', x]
+
+  goal: [A, D, '9:00']
+
+  journey_set:
+    journey-A:
+      stats: ['10:00', '11:15']
+      segments:
+        trip-A: [trip, A, D]
+
+
+testJourneyWithEarlyTermination:
+  timetable:
+    CS1234:
+      - [A, x, '10:00']
+      - [B, '10:15', '10:20']
+      - [C, '10:45', '11:00']
+      - [D, '11:15', '11:20']
+      - [E, '11:35', x]
+
+  goal: [A, D, '9:00']
+
+  journey_set:
+    journey-A:
+      stats: ['10:00', '11:15']
+      segments:
+        trip-A: [trip, A, D]
+
+
+testMultipleRoutes:
+  timetable:
+    CS1234:
+      - [A, x, '10:15']
+      - [B, '10:25', '10:30']
+      - [C, '11:06', '11:10']
+      - [D, '11:40', '11:45']
+      - [E, '11:50', x]
+    CS1235:
+      - [A, x, '10:10']
+      - [C, '10:45', '11:00']
+      - [D, '11:01', '11:05']
+      - [E, '12:00', x]
+    CS1236:
+      - [M, x, '10:30']
+      - [C, '11:00', '11:05']
+      - [D, '11:25', '11:30']
+      - [E, '11:40', x]
+
+  goal: [A, E, '9:00']
+
+  journey_set:
+    earliest:
+      stats: ['10:10', '11:40']
+      segments:
+        trip-A: [trip, A, C]
+        trip-B: [trip, C, E]
+    least-hops:
+      stats: ['10:15', '11:50']
+      segments:
+        trip-A: [trip, A, E]
+
+
+testNoRoute:
+  timetable:
+    CS1234:
+      - [A, x, '10:00']
+      - [B, '10:25', '10:30']
+      - [E, '10:40', x]
+    CS1236:
+      - [M, x, '11:30']
+      - [N, '11:40', x]
+
+  goal: [A, N, '9:00']
+
+  journey_set:
+
+
+testNoRouteBecauseOfMissedConnection:
+  timetable:
+    CS1235:
+      - [A, x, '10:10']
+      - [M, '11:35', '11:45']
+      - [X, '12:00', x]
+    CS1236:
+      - [M, x, '11:30']
+      - [N, '11:40', x]
+
+  goal: [A, N, '9:00']
+
+  journey_set:
+
+
+testRouteToNonTimetabledConnection:
+  timetable:
+    trips:
+      CS1235:
+        - [A, x, '10:10']
+        - [B, '10:20', '10:25']
+        - [C, '10:40', x]
+    footpaths:
+      - [B, D, 30]
+
+  goal: [A, D, '10:00']
+
+  journey_set:
+    journey-A:
+      stats: ['10:10', '10:50']
+      segments:
+        trip: [trip, A, B]
+        walk: [fp, B, D]
+
+
+testRouteFromNonTimetabledConnection:
+  timetable:
+    trips:
+      CS1235:
+        - [A, x, '10:10']
+        - [B, '10:20', '10:25']
+        - [C, '10:40', '11:00']
+        - [D, '11:20', x]
+    footpaths:
+      - [X, B, 30]
+
+  goal: [X, C, '9:00']
+
+  journey_set:
+    journey-A:
+      stats: ['9:55', '10:40']
+      segments:
+        walk: [fp, X, B]
+        trip: [trip, B, C]
+
+
+testRouteWithNonTimetabledConnection:
+  timetable:
+    trips:
+      CS1235:
+        - [A, x, '10:10']
+        - [B, '10:20', '10:25']
+        - [C, '10:40', x]
+      CS1236:
+        - [M, x, '11:00']
+        - [N, '11:50', '11:55']
+        - [X, '12:00', x]
+    footpaths:
+      - [B, M, 30]
+      - [C, N, 120]
+
+  goal: [A, X, '10:00']
+
+  journey_set:
+    journey-A:
+      stats: ['10:10', '12:00']
+      segments:
+        trip-1: [trip, A, B]
+        walk: [fp, B, M]
+        trip-2: [trip, M, X]
+
+
+testRouteWithNonTimetabledConnectionThatCantBeUsed:
+  timetable:
+    trips:
+      CS1235:
+        - [A, x, '10:10']
+        - [M, '10:35', '10:45']
+        - [X, '11:30', x]
+      CS1236:
+        - [Y, x, '11:30']
+        - [N, '11:40', x]
+    footpaths:
+      - [M, Y, 60]
+      # - [Y, M, 1]
+      - [X, Y, 1]
+
+  goal: [A, N, '9:00']
+
+  journey_set:
+
+
+testNonTimetableOnly:
+  timetable:
+    trips:
+      CS1235:
+        - [A, x, '10:00']
+        - [B, '10:15', '10:20']
+        - [C, '10:45', '11:00']
+        - [D, '11:15', x]
+    footpaths:
+      - [A, D, 30]
+
+  goal: [A, D, '9:00']
+
+  journey_set:
+    journey-A:
+      stats: ['9:00', '9:30']
+      segments:
+        walk: [fp, A, D]
+
+
+profile:
+  timetable:
+    trips:
+
+      # Dominated journey due to early departure with same arrival
+      CS1232:
+        - [A, x, '10:00']
+        - [C, '11:30', x]
+
+      # This leads to optimal journey for earliest-query,
+      #  with arrival at 12:00 and 3 trips, BUT not good enough for
+      #  profile query, which also has same-arrival journey with less hops.
+      CS1233:
+        - [A, x, '10:10']
+        - [X1, '11:00', '11:05']
+        - [B, '11:20', '11:30']
+        - [X2, '12:00', x]
+      CS1234:
+        - [Y1, x, '10:50']
+        - [B, '11:10', '11:28']
+        - [C, '11:30', x]
+
+      # Leads to 10:50-12:00/2 optimal
+      CS1235:
+        - [A, x, '10:50']
+        - [B, '11:00', '11:05']
+        - [C, '11:30', x]
+
+      # Leads to 11:10-13:00/2 optimal
+      CS1236:
+        - [A, x, '11:10']
+        - [B, '11:35', '11:45']
+        - [C, '12:30', x]
+
+      # Optimal because single src-dst trip
+      CS1237:
+        - [A, '9:00', '9:20']
+        - [Z1, '9:30', '9:40']
+        - [Z2, '10:00', '10:10']
+        - [Z3, '10:20', '10:30']
+        - [Z4, '10:40', '10:50']
+        - [Z5, '11:00', '11:10']
+        - [Z6, '11:20', '11:30']
+        - [Z7, '11:40', '11:50']
+        - [B, '12:00', '12:10']
+        - [D, '14:00', x]
+
+      # End-trips
+      CS1238:
+        - [C, '11:30', '11:40']
+        - [D, '12:00', x]
+      CS1239:
+        - [C, '12:30', '12:40']
+        - [D, '13:00', x]
+
+    footpaths:
+      - [A, D, 120] # direct footpath, longer than most trips
+
+  goal: [A, D, '9:00', '14:00']
+
+  journey_set:
+    journey-A:
+      stats: ['11:10', '13:00']
+      segments:
+        trip-A: [trip, A, C]
+        trip-B: [trip, C, D]
+    journey-B:
+      stats: ['10:50', '12:00']
+      segments:
+        trip-A: [trip, A, C]
+        trip-B: [trip, C, D]
+    journey-C:
+      stats: ['9:20', '14:00']
+      segments:
+        direct-trip: [trip, A, D]
+    direct-footpath:
+      stats: ['9:00', '11:00']
+      segments:
+        direct-trip: [fp, A, D]
